@@ -88,7 +88,8 @@
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">NSRunLoop *runLoop = [NSRunLoop currentRunLoop];</div><div class="line">NSTimer *timer = [NSTimer timerWithTimeInterval:<span class="number">1.</span>f target:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(timerFireMethod:) userInfo:<span class="literal">nil</span> repeats:<span class="literal">YES</span>];</div><div class="line">[runLoop addTimer:timer forMode:NSRunLoopCommonModes];</div></pre></td></tr></table></figure>
 
 <p><code>NSRunLoopCommonModes</code>不是一个具体的mode, 它是一个mode的集合(<code>NSDefaultRunLoopMode</code>和<code>NSEventTrackingRunLoopMode</code>都属于这个集合), 如果添加timer的时候用这个mode, 那么这个timer就会被添加到集合里面的每一个mode. 这样在滑动的时候timer也能被正常的触发了.</p>
-<p><em>在使用<code>runMode:beforeDate:</code>方法的时候, mode不能被指定为<code>NSRunLoopCommonModes</code>! 因为它不是一个具体的mode, 如果指定了, runloop会立即退出.</em></p>
+<h4 id="注意!">注意!</h4>
+<p><strong>在使用<code>runMode:beforeDate:</code>方法的时候, mode不能被指定为<code>NSRunLoopCommonModes</code>! 因为它不是一个具体的mode, 如果指定了, runloop会立即退出.</strong></p>
 
       
     </div>
