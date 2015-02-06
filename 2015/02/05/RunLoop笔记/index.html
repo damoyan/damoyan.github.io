@@ -60,8 +60,35 @@
     </header>
     <div class="entry">
       
-        <h1 id="RunLoop小结">RunLoop小结</h1>
-<p>最近看了@孙源的一个介绍<code>RunLoop</code>的视频，学到一些东西，记录在这。</p>
+        <p>最近看了@孙源的一个介绍<code>RunLoop</code>的视频，学到一些东西，记录在这。</p>
+<h3 id="RunLoop的创建">RunLoop的创建</h3>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">NSRunLoop *runloop = [NSRunLoop currentRunLoop];</div></pre></td></tr></table></figure>
+
+<p>需要注意的是, 这行代码需要在runloop所在的线程调用. 当所在线程的runloop已经存在时, 此方法会直接返回该runloop, 如果不存在, 此方法会先创建runloop.</p>
+<h3 id="RunLoop的运行">RunLoop的运行</h3>
+<p>在运行runloop之前, 需要给它添加事件源, runloop的事件源分为三种类型:</p>
+<ul>
+<li>Input Source (performSelector, 监听port)</li>
+</ul>
+<ol>
+<li>Timer</li>
+<li>Observer (只能通过CoreFoundation的API添加)</li>
+</ol>
+<p>如果没有事件源的话, runloop会立即退出. Input Source从<code>NSRunLoop</code>的头文件看, 主要用的就是<code>performSelector:</code>和<code>addPort:forMode:</code>两种方式. 实际上还有其他的方式, 甚至可以自定义, 但是我还没研究过.</p>
+<h4 id="添加Timer">添加Timer</h4>
+<p>Timer有两种初始化的方式:</p>
+<ol>
+<li>timeWithTimeInterval:…</li>
+</ol>
+<ul>
+<li>scheduledTimerWithTimeInterval:…</li>
+</ul>
+<p>1会创建一个<code>Timer</code>, 但是不会触发, 需要手动的添加到runloop里面去调度. 2创建一个<code>Timer</code>并且把它放到runloop的<code>NSDefaultRunLoopMode</code>里面去调度.</p>
+<p>1比2更灵活, 当我们滑动<code>UIScrollView</code>的时候, runloop是处在<code>NSEventTrackingRunLoopMode</code>, 这个时候如果通过2添加的<code>Timer</code>是不会被触发的, 因为Mode不对. 如果我们想在滑动view的时候Timer不被影响的话, 可以用1的方式.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">NSRunLoop *runLoop = [NSRunLoop currentRunLoop];</div><div class="line">NSTimer *timer = [NSTimer timerWithTimeInterval:<span class="number">1.</span>f target:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(timerFireMethod:) userInfo:<span class="literal">nil</span> repeats:<span class="literal">YES</span>];</div><div class="line">[runLoop addTimer:timer forMode:NSRunLoopCommonModes];</div></pre></td></tr></table></figure>
+
+<p><code>NSRunLoopCommonModes</code>不是一个具体的mode, 它是一个mode的集合(<code>NSDefaultRunLoopMode</code>和<code>NSEventTrackingRunLoopMode</code>都属于这个集合), 如果添加timer的时候用这个mode, 那么这个timer就会被添加到集合里面的每一个mode. 这样在滑动的时候timer也能被正常的触发了.</p>
+<p>==在使用<code>runMode:beforeDate:</code>方法的时候, mode不能被指定为<code>NSRunLoopCommonModes</code>! 因为它不是一个具体的mode, 如果指定了, runloop会立即退出.==</p>
 
       
     </div>
