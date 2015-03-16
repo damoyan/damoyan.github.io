@@ -102,9 +102,41 @@ ga('send', 'pageview');
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>gesture分为两种: 离散型(discrete)和连续型(continuous). 离散型比如TapGesture, 连续型的比如PanGesture, LongPressGesture等.</p>
-<p>状态转换如下:</p>
+        <h2 id="手势状态变化">手势状态变化</h2>
+<p>gesture分为两种: 离散型(discrete)和连续型(continuous). 离散型比如TapGesture, 连续型的比如PanGesture, LongPressGesture等.</p>
+<p><code>GestureRecognizer</code>是通过一个有限状态机来识别gesture的.<br><code>GestureRecognizer</code>状态转换如下:</p>
 <p><img src="../images/gr_state_transitions.png" alt="State Change"></p>
+<p>GestureRecognizer初始化的时候需要指定target和selector. 每当<code>GestureRecognizer</code>状态转换的时候, <code>GestureRecognizer</code>就会向指定的target发送selector消息.</p>
+<blockquote>
+<p>注意1:</p>
+<p>实际上, 对于continuous gesture只有在<code>GestureRecognizer</code>转换到<strong>Began, Changed, Recognized(在代码里对应Ended状态)</strong>的时候才会发送消息给target, 也就是说, 在Possible, Failed, Canceled状态target都是不会收到消息的. 而对于discrete gesture就只有Recognized状态会收到消息了.</p>
+<p>注意2:</p>
+<p>Swipe Gesture是Discrete gesture类型.</p>
+</blockquote>
+<h2 id="多个手势共用的情况">多个手势共用的情况</h2>
+<p>当有多个手势添加到一个View上的时候, 默认的是没有识别顺序的, 也就意味着每次touch传递给gesture recognizer的顺序都是随机的. 官方文档指出我们可以通过三种方式来修改默认的行为:</p>
+<ul>
+<li>指定一个<code>GestureRecognizerA</code>在另一个<code>GestureRecognizerB</code>之前解析touch事件</li>
+<li>允许两个<code>GestureRecognizer</code>同时运作</li>
+<li>阻止一个<code>GestureRecognizer</code>解析touch事件</li>
+</ul>
+<h3 id="指定两个GestureRecognizer的解析顺序">指定两个<code>GestureRecognizer</code>的解析顺序</h3>
+<p><code>UIGestureRecognizer</code>提供了<code>requireGestureRecognizerToFail:</code>方法可以做到.</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">gestureA.requireGestureRecognizerToFail(gestureB)</div></pre></td></tr></table></figure>
+
+<p>这个方法的意思是: 只有当gestureB无法解析touch事件(即状态进入Failed状态)的时候, gestureA才开始解析touch事件, 此时gestureA处于Possible状态. 换句话说, 如果gestureB解析了touch事件并且进入了Began状态, 那么gestureA会直接Fail.</p>
+<h3 id="阻止GestureRecognizer解析事件">阻止<code>GestureRecognizer</code>解析事件</h3>
+<p>通过实现<code>UIGestureRecognizerDelegate</code>协议提供的两种方法都可以做到此要求: <code>gestureRecognizer:shouldReceiveTouch:</code>和<code>gestureRecognizerShouldBegin:</code>.</p>
+<p>每当系统收到一个新的touch的时候<code>gestureRecognizer:shouldReceiveTouch:</code>就会被调用. 实现该方法并返回<code>NO</code>, 那么该<code>GestureRecognizer</code>就不会收到关于这个touch的信息.这个方法是在<code>touchesBegan:withEvent:</code>之前调用的.</p>
+<p><code>gestureRecognizerShouldBegin:</code>是在<code>GestureRecognizer</code>将要从Possible状态转出的时候调用的, 如果返回<code>NO</code>, 那么<code>GestureRecognizer</code>会立即转换到Failed状态, 那么其他的事件处理者就可以接入了.</p>
+<h3 id="两个GestureRecognizer同时运作">两个<code>GestureRecognizer</code>同时运作</h3>
+<p>实现<code>UIGestureRecognizerDelegate</code>协议的<code>gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:</code>方法, 并且返回<code>YES</code>.</p>
+<blockquote>
+<p>注意:</p>
+<p>如果你有两个<code>UIGestureRecognizer</code>,假如是A和B, 那么你需要在A或者B上实现这个方法并且返回<code>YES</code>就可以允许两个同时运作. 但是如果想要阻止他们同时运作, 那么需要保证这两个<code>UIGestureRecognizer</code>的这个方法都返回<code>NO</code>.</p>
+</blockquote>
+<h3 id="在两个GestureRecognizer指定单向的关系(Specifying_a_One-Way_RelationShip_Between_Two_Gesture_Recognizer)">在两个<code>GestureRecognizer</code>指定单向的关系(Specifying a One-Way RelationShip Between Two Gesture Recognizer)</h3>
+<p>你可以实现一个子类, 继承一个手势, 然后实现<code>`GestureRecognizerSubclass.h</code>里面的<code>canPreventGestureRecognizer:</code>和<code>canBePreventedByGestureRecognizer:</code>来实现单向的关系. 例如: 默认的情况下, pinch gesture和rotation gesture之间是相互阻止的, 因为它们不可能被同时识别.</p>
 
       
     </div>
