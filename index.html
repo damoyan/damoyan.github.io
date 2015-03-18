@@ -176,6 +176,30 @@ ga('send', 'pageview');
     <div class="article-entry" itemprop="articleBody">
       
         <h2 id="函数">函数</h2>
+<h2 id="类">类</h2>
+<p>类的成员有三种</p>
+<ul>
+<li>属性 Property (包括存储属性<code>Stored Property</code>和计算属性<code>Computed Property</code>), 同时我们还可以定义<code>Property Observer</code>(<code>willSet</code>和<code>didSet</code>)</li>
+<li>方法 Function</li>
+<li>下表脚本 SubScript</li>
+</ul>
+<p>其中存储属性里又包含了延迟存储属性. 延迟存储属性是指当第一次被调用的时候才会计算其初始值的属性. 在属性声明前使用<code>lazy</code>关键字来标示一个延迟存储属性.</p>
+<blockquote>
+<p>注意:</p>
+<p>必须将延迟存储属性声明成变量(用<code>var</code>关键字), 因为属性的值在实例构造完成之前可能无法得到, 而常量属性在构造过程中必须要有初始值.</p>
+</blockquote>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">DataManager</span></span>{</div><div class="line">    lazy <span class="keyword">var</span> importer = <span class="type">DataImporter</span>()</div><div class="line">    <span class="keyword">var</span> data = [<span class="type">String</span>]()</div><div class="line">}</div><div class="line"></div><div class="line"><span class="keyword">let</span> manager = <span class="type">DataManager</span>()</div><div class="line">manager.data.append(<span class="string">"some data"</span>)</div><div class="line"><span class="comment">// 这时候importer属性还没有被创建</span></div></pre></td></tr></table></figure>
+
+<p>子类继承父类的时候, 可以继承所有的这三种成员. 可以重写(override)方法, 属性和下表脚本来优化或者修改它们的行为.</p>
+<p>你可以将继承来的只读属性重写为读写属性, 只需要在重写版本的属性里提供getter和setter即可. 但是, 不可以将一个继承来的读写属性重写为只读属性. (只读属性应该指的是只读计算属性, 用let声明的常量存储属性不在此列)</p>
+<p>计算属性只能用<code>var</code>关键字声明.</p>
+<p>对于只读计算属性和let声明的存储型属性不能添加Property Observer. 对于计算属性, 也不可以同时提供setter和Property Observer. 因为你可以在setter中观察到任何值的变化</p>
+<p>总结: Property Observer只能用于用<code>var</code>关键字声明的Stored Property; getter和setter只能用于计算属性, 而计算属性只能用<code>var</code>声明.</p>
+<p>可以同过使用final关键字来阻止类被继承, </p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">final <span class="class"><span class="keyword">class</span> <span class="title">A</span></span>{</div><div class="line">} <span class="comment">// 类A不能被继承</span></div><div class="line"></div><div class="line">final <span class="keyword">var</span> propertyA: <span class="type">String</span> <span class="comment">// 不能被继承的属性</span></div><div class="line">final <span class="func"><span class="keyword">func</span></span> ... <span class="comment">//</span></div><div class="line">final <span class="keyword">class</span> <span class="func"><span class="keyword">func</span>.</span>.. <span class="comment">//</span></div><div class="line">final <span class="keyword">subscript</span> ... <span class="comment">//</span></div></pre></td></tr></table></figure>
+
+<h2 id="构造过程">构造过程</h2>
+<p>Swift的构造器不需要返回值.</p>
 
       
     </div>
